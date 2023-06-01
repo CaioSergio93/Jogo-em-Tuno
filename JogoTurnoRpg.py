@@ -1,4 +1,42 @@
 import random
+import sqlite3
+
+# Função para criar a conexão com o banco de dados SQLite
+def criar_conexao():
+    # Conecta ao banco de dados ou cria um novo se não existir
+    conn = sqlite3.connect('jogo_rpg.db')
+    return conn
+
+# Função para fechar a conexão com o banco de dados
+def fechar_conexao(conn):
+    conn.close()
+    
+def criar_tabelas(conn):
+    cursor = conn.cursor()
+
+    # Cria a tabela Jogadores
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Jogadores (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nome TEXT,
+                        classe TEXT,
+                        nivel INTEGER,
+                        pontos_vida INTEGER,
+                        pontos_ataque INTEGER,
+                        experiencia INTEGER
+                    )''')
+    
+ # Cria a tabela Inimigos
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Inimigos (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nome TEXT,
+                        classe TEXT,
+                        nivel INTEGER,
+                        pontos_vida INTEGER,
+                        pontos_ataque INTEGER
+                    )''')
+
+    # Salva as alterações no banco de dados
+    conn.commit()
 
 class Jogador:
     def __init__(self, nome, classe, nivel):
@@ -41,6 +79,7 @@ class Jogador:
         opcoes_validas = [1, 2, 3]
         while True:
             print("Escolha uma ação:")
+            print("0. Voltar")
             print("1. Atacar")
             print("2. Defender")
             print("3. Esquivar")
@@ -51,6 +90,8 @@ class Jogador:
                 return "defender"
             elif escolha == 3:
                 return "esquivar"
+            elif escolha == 0:
+                return "voltar"
             else:
                 print("Opção inválida. Ação padrão 'Atacar' será realizada.")
 
@@ -118,6 +159,7 @@ def gerar_fase(jogadores, nivel):
 
 def rodada(jogadores, inimigos):
     print("--- Rodada ---")
+    
 
     for jogador in jogadores:
         if jogador.esta_vivo():
@@ -205,6 +247,9 @@ def validar_nome(nome):
 
 def jogar():
     print("=== Batalha de RPG ===")
+    conn = criar_conexao()  # Criar a conexão com o banco de dados
+    criar_tabelas(conn)  # Criar as tabelas no banco de dados
+    
     while True:
         try:
             num_jogadores = int(input("Quantos jogadores irão jogar? "))
@@ -272,5 +317,7 @@ def jogar():
 
         if not reiniciar_jogo():
             break
+    
+        conn.close()
 
 jogar()
